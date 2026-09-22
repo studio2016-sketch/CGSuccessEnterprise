@@ -1,0 +1,1 @@
+import type {MetadataRoute} from 'next';export default function sitemap():MetadataRoute.Sitemap{return ['','/about','/expertise','/boutique','/contact'].map(path=>({url:'https://www.cgsuccessenterprise.com'+path,lastModified:new Date()}))}
