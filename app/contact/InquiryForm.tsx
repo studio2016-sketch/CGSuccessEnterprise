@@ -1,6 +1,6 @@
 'use client';
 import {useState,type FormEvent} from 'react';
-const destination=process.env.NEXT_PUBLIC_INQUIRY_EMAIL?.trim()||'';
+const destination=process.env.NEXT_PUBLIC_INQUIRY_EMAIL?.trim()||'info@cgsuccessenterprise.com';
 const services=['Strategic Consulting','Event Production','Organizational Systems','Partnership / Collaboration','Other'];
 export default function InquiryForm(){
  const [fields,setFields]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',service:'',budget:'',timeline:'',message:''});
