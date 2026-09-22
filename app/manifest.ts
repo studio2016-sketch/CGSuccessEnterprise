@@ -1,0 +1,1 @@
+import type {MetadataRoute} from 'next';export default function manifest():MetadataRoute.Manifest{return {name:'CG Enterprises',short_name:'CG Enterprises',description:'Strategy. Experiences. Impact.',start_url:'/',display:'browser',background_color:'#faf9f5',theme_color:'#9c7a3c',icons:[{src:'/favicon.svg',sizes:'any',type:'image/svg+xml'}]}}
