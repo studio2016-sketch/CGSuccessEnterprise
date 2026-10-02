@@ -1,5 +1,5 @@
-import AcceptProposal from "./AcceptProposal";import {notFound} from "next/navigation";
-export const dynamic="force-dynamic";
+import type {Metadata} from "next";import AcceptProposal from "./AcceptProposal";import {notFound} from "next/navigation";
+export const dynamic="force-dynamic";export const metadata:Metadata={title:"Private Proposal | CG Success",robots:{index:false,follow:false},referrer:"no-referrer"};
 export default async function Proposal({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{access?:string}>}){
  const {id}=await params;const {access}=await searchParams;if(!access)notFound();
  const host="https://wgos.app";const r=await fetch(host+"/api/public/proposals/"+encodeURIComponent(id)+"?access="+encodeURIComponent(access),{cache:"no-store"});if(!r.ok)notFound();
