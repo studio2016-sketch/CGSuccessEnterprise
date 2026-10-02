@@ -1,19 +1,22 @@
 'use client';
 import {useState,type FormEvent} from 'react';
-const destination=process.env.NEXT_PUBLIC_INQUIRY_EMAIL?.trim()||'info@cgsuccessenterprise.com';
 const services=['Strategic Consulting','Event Production','Organizational Systems','Partnership / Collaboration','Other'];
 export default function InquiryForm(){
  const [fields,setFields]=useState({firstName:'',lastName:'',email:'',phone:'',organization:'',service:'',budget:'',timeline:'',message:''});
- const [ready,setReady]=useState(false);
+ const [status,setStatus]=useState<'idle'|'sending'|'sent'|'error'>('idle');
  const set=(name:keyof typeof fields,value:string)=>setFields(prev=>({...prev,[name]:value}));
- const submit=(event:FormEvent<HTMLFormElement>)=>{
-  event.preventDefault();if(!destination)return;
-  const subject='CG Enterprises inquiry — '+(fields.service||'New project')+' — '+fields.firstName+' '+fields.lastName;
-  const body=['NEW CG ENTERPRISES INQUIRY','','Name: '+fields.firstName+' '+fields.lastName,'Email: '+fields.email,'Phone: '+(fields.phone||'Not provided'),'Organization: '+(fields.organization||'Not provided'),'Interest: '+fields.service,'Estimated budget: '+(fields.budget||'Not specified'),'Timeline: '+(fields.timeline||'Not specified'),'','PROJECT DETAILS',fields.message,'','Sent from CG Enterprises website inquiry form.'].join('\n');
-  const href='mailto:'+encodeURIComponent(destination)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
-  setReady(true);window.location.href=href;
+ const submit=async(event:FormEvent<HTMLFormElement>)=>{
+  event.preventDefault();setStatus('sending');
+  try{
+   const r=await fetch('/api/inquiry',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
+    name:(fields.firstName+' '+fields.lastName).trim(),email:fields.email,phone:fields.phone,organizationName:fields.organization,
+    title:'CG Success inquiry — '+(fields.service||'New project'),message:fields.message,
+    details:{service:fields.service,budget:fields.budget,timeline:fields.timeline}
+   })});
+   if(!r.ok)throw new Error('Unable to submit inquiry');setStatus('sent');
+  }catch{setStatus('error')}
  };
- return <form className="inquiryForm" onSubmit={submit}><p className="eyebrow">YOUR INQUIRY</p><h2>Tell us about your vision.</h2><p className="formIntro">A few details will help us understand your project. For now, submitting opens your email app with a prepared message for you to review and send.</p>
+ return <form className="inquiryForm" onSubmit={submit}><p className="eyebrow">YOUR INQUIRY</p><h2>Tell us about your vision.</h2><p className="formIntro">A few details will help us understand your project and route it to the right next step.</p>
  <div className="inquiryGrid">
  <label>FIRST NAME *<input value={fields.firstName} onChange={e=>set('firstName',e.target.value)} required autoComplete="given-name" maxLength={80}/></label>
  <label>LAST NAME *<input value={fields.lastName} onChange={e=>set('lastName',e.target.value)} required autoComplete="family-name" maxLength={80}/></label>
@@ -25,6 +28,7 @@ export default function InquiryForm(){
  <label>IDEAL TIMELINE<select value={fields.timeline} onChange={e=>set('timeline',e.target.value)}><option value="">Select timeline</option>{['As soon as possible','Within 30 days','1–3 months','3–6 months','6+ months','Exploring options'].map(x=><option key={x}>{x}</option>)}</select></label>
  <label className="full">TELL US ABOUT YOUR PROJECT *<textarea value={fields.message} onChange={e=>set('message',e.target.value)} rows={6} required maxLength={4000} placeholder="Your vision, goals, location, event date (if applicable), and anything else we should know."/></label>
  </div>
- {destination?<><button className="goldButton" type="submit">PREPARE MY INQUIRY ↗</button><p className="formNote" role="status">{ready?'Your email app should open with the prepared inquiry. Please press Send there; this site has not sent it automatically.':'Your email app will open so you can review and send your inquiry. Nothing is transmitted by this website.'}</p><a className="textLink" href={'mailto:'+destination}>OR EMAIL US DIRECTLY ↗</a></>:<div className="launchNotice" role="status">Our inquiry email is being connected. Please check back shortly. No information entered here is stored or transmitted.</div>}
+ <button className="goldButton" type="submit" disabled={status==='sending'}>{status==='sending'?'SENDING…':status==='sent'?'INQUIRY RECEIVED ✓':'SEND MY INQUIRY →'}</button>
+ <p className="formNote" role="status">{status==='sent'?'Thank you. Your inquiry has been received and routed for review.':status==='error'?'We could not submit your inquiry. Please try again.':'Your inquiry is sent securely into the CG Success client workflow.'}</p>
  </form>
 }
